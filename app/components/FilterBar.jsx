@@ -6,17 +6,21 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function FilterBar({ filters, projects, tags, onFilterChange, onClearFilters }) {
-  const hasActiveFilters = filters.projectId || filters.tagIds?.length > 0 || filters.status || filters.dateRange
+  const hasActiveFilters =
+    filters.projectId || (filters.tagIds?.length ?? 0) > 0 || filters.status || filters.dateRange
 
   return (
     <div className="flex flex-wrap items-center gap-3 p-4 bg-card border border-border rounded-lg">
       <span className="text-sm font-medium text-foreground">Filters:</span>
 
+      {/* ✅ Project Filter */}
       <Select
         value={filters.projectId?.toString() || "all"}
-        onValueChange={(value) => onFilterChange({ projectId: value === "all" ? null : Number.parseInt(value) })}
+        onValueChange={(value) =>
+          onFilterChange({ projectId: value === "all" ? null : Number.parseInt(value) })
+        }
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[200px]">
           <SelectValue placeholder="All Projects" />
         </SelectTrigger>
         <SelectContent>
@@ -29,6 +33,7 @@ export default function FilterBar({ filters, projects, tags, onFilterChange, onC
         </SelectContent>
       </Select>
 
+      {/* ✅ Status Filter */}
       <Select
         value={filters.status || "all"}
         onValueChange={(value) => onFilterChange({ status: value === "all" ? null : value })}
@@ -44,6 +49,7 @@ export default function FilterBar({ filters, projects, tags, onFilterChange, onC
         </SelectContent>
       </Select>
 
+      {/* ✅ Date Filter */}
       <Select
         value={filters.dateRange || "all"}
         onValueChange={(value) => onFilterChange({ dateRange: value === "all" ? null : value })}
@@ -59,9 +65,10 @@ export default function FilterBar({ filters, projects, tags, onFilterChange, onC
         </SelectContent>
       </Select>
 
+      {/* ✅ Tag Filter */}
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => {
-          const isSelected = filters.tagIds?.includes(tag.id)
+          const isSelected = (filters.tagIds ?? []).includes(tag.id)
           return (
             <Badge
               key={tag.id}
@@ -72,7 +79,7 @@ export default function FilterBar({ filters, projects, tags, onFilterChange, onC
                 const newTagIds = isSelected
                   ? filters.tagIds.filter((id) => id !== tag.id)
                   : [...(filters.tagIds || []), tag.id]
-                onFilterChange({ tagIds: newTagIds.length > 0 ? newTagIds : null })
+                onFilterChange({ tagIds: newTagIds })
               }}
             >
               {tag.name}
