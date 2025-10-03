@@ -174,7 +174,50 @@ export default function DashboardPage() {
   }
 
   // Apply filters and sorting
-  const filteredTasks = filterTasks(tasks, filters)
+  const filteredTasks = tasks.filter((task) => {
+    // ✅ Project filter (match by project_id, not name!)
+    if (filters.projectId && task.project_id !== filters.projectId) {
+      return false
+    }
+  
+    // ✅ Status filter
+    if (filters.status && task.status !== filters.status) {
+      return false
+    }
+  
+    // ✅ Tags filter (make sure all selected tags exist in the task)
+    if (filters.tagIds?.length > 0) {
+      const taskTagIds = task.tags.map((t) => t.id)
+      if (!filters.tagIds.every((id) => taskTagIds.includes(id))) {
+        return false
+      }
+    }
+  
+    // ✅ Date filter
+    if (filters.dateRange) {
+      const due = new Date(task.due_date)
+      const today = new Date()
+  
+      if (filters.dateRange === "today") {
+        if (due.toDateString() !== today.toDateString()) return false
+      }
+  
+      if (filters.dateRange === "week") {
+        const startOfWeek = new Date(today)
+        startOfWeek.setDate(today.getDate() - today.getDay()) // Sunday
+        const endOfWeek = new Date(today)
+        endOfWeek.setDate(today.getDate() + (6 - today.getDay())) // Saturday
+        if (due < startOfWeek || due > endOfWeek) return false
+      }
+  
+      if (filters.dateRange === "overdue") {
+        if (due >= today) return false
+      }
+    }
+  
+    return true
+  })
+  
   const sortedTasks = sortTasksByDueDate(filteredTasks)
 
   // Calculate stats
